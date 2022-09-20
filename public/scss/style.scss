@@ -1,0 +1,48 @@
+#login {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+
+    #register {
+        position: absolute;
+        max-width: 450px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        small {
+            font-size: 12px;
+        }
+        input {
+            height: 45px;
+        }
+        button {
+            height: 45px;
+        }
+    }
+}
+
+#signup {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+
+    #register {
+        position: absolute;
+        max-width: 450px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        small {
+            font-size: 12px;
+        }
+        input {
+            height: 45px;
+        }
+        button {
+            height: 45px;
+        }
+    }
+}
+

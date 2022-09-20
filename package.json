@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "server": "nodemon app.js",
+    "start": "nodemon --watch \"./routes/*.js\" --exec \"npm run server\""
+  },
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "mongodb": "^4.9.1"
+  },
+  "devDependencies": {
+    "ejs": "^3.1.8",
+    "nodemon": "^2.0.20"
+  }
+}

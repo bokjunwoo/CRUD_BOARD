@@ -1,0 +1,45 @@
+#login {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+#login #register {
+  position: absolute;
+  max-width: 450px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#login #register small {
+  font-size: 12px;
+}
+#login #register input {
+  height: 45px;
+}
+#login #register button {
+  height: 45px;
+}
+
+#signup {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+#signup #register {
+  position: absolute;
+  max-width: 450px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#signup #register small {
+  font-size: 12px;
+}
+#signup #register input {
+  height: 45px;
+}
+#signup #register button {
+  height: 45px;
+}
+
+/*# sourceMappingURL=style.css.map */
