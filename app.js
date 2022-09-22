@@ -1,12 +1,12 @@
 const express = require('express');
 
-const PORT = process.env.PORT;
-
-/* mongodb */
-const mongoClient = require('./routes/mongo');
+const PORT = 8000;
 
 /* express-session */
 const session = require('express-session');
+
+/* passport */
+const passport = require('passport');
 
 /* dotenv */
 require('dotenv').config();
@@ -24,6 +24,10 @@ app.use(
     })
 );
 
+/* passport session */
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -34,6 +38,11 @@ app.use(express.static('public'));
 
 
 /* routes */
+
+/* localStrategy */
+const passportRouter = require('./routes/passport');
+passportRouter();
+/* 메인 */
 const router = require('./routes/index');
 app.use('/', router);
 /* 회원가입 */
@@ -45,6 +54,13 @@ app.use('/login', loginRouter.router);
 /* 게시판 */
 const boardRouter = require('./routes/board');
 app.use('/board', boardRouter);
+/* 오류발생 */
+app.use((err, req, res, next) => {
+    console.log(err.stack);
+    res.status(err.statusCode || 500);
+    res.send(err.message);
+});
+  
 
 /* start */
 app.listen(PORT, () => {

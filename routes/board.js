@@ -17,7 +17,6 @@ router.get('/', async (req, res) => {
         articleCounts: articleLen,
         userId: req.session.userId,
     });
-
 });
 
 /* 글작성 GET */
@@ -41,44 +40,29 @@ router.get('/write', isLogin.isLogin, (req, res) => {
 // });
 
 /* 글작성 POST */
-// router.post('/write', isLogin.isLogin, async (req, res) => {
-//     const client = await mongoClient.connect();
-//     const cursor = client.db('Shop').collection('counter');
-//     await cursor.findOne({name: 'listTotal'}, function(err, result){
-//         const allPost = result.totalPost;
-
-//         const savePost = {
-//             _id: allPost + 1,
-//             id: req.session.userId,
-//             title: req.body.title,
-//             content: req.body.content,
-//         }
-
-//         const cursor1 = client.db('Shop').collection('board');
-//         cursor1.insertOne(savePost, (err, result) => {
-
-//             cursor.updateOne({name: 'listTotal'},{$inc:{totalPost:1}}, (err, result) => {
-//                 if(err) {
-//                     return console.log('err')
-//                 }
-//             })
-//         })
-//     });
-//     res.redirect('/board');
-// });
 router.post('/write', isLogin.isLogin, async (req, res) => {
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('counter');
-    const cursor2 = client.db('Shop').collection('users');
     await cursor.findOne({name: 'listTotal'}, function(err, result){
         const allPost = result.totalPost;
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = ('0' + (today.getMonth() + 1)).slice(-2);
+        const day = ('0' + today.getDate()).slice(-2);
+        const hours = ('0' + today.getHours()).slice(-2);
+        const minutes = ('0' + today.getMinutes()).slice(-2);
+
+        const time = hours + ':' + minutes;
+        const dateFull = year + '.' + month + '.' + day + ' ' + hours + ':' + minutes;
 
         const savePost = {
             _id: allPost + 1,
             id: req.session.userId,
+            name: req.session.userName,
             title: req.body.title,
             content: req.body.content,
-            name: req.session.userName,
+            time,
+            dateFull,
         }
 
         const cursor1 = client.db('Shop').collection('board');
@@ -105,7 +89,27 @@ router.get('/detail/:id', async (req, res) => {
         ARTICLE,
         userId: req.session.userId,
     });
+}); 
+
+/* 자세히보기 -> 댓글 POST */
+router.post('/detail/:id', async (req, res) => {
+    req.params.id = parseInt(req.params.id);
+    const client = await mongoClient.connect();
+    const cursor = client.db('Shop').collection('board');
+    await cursor.updateOne(
+        { _id: req.params.id },
+        {
+            $push: {
+                comment: {
+                    comment: req.body.comment,
+                    userId: req.session.userId,
+                }
+            },
+        }
+    );
+    res.redirect('/detail/40')
 });
+
 
 /* 수정하기 GET */
 router.get('/emend/:id', isLogin.isLogin, async (req, res) => {
@@ -120,6 +124,7 @@ router.get('/emend/:id', isLogin.isLogin, async (req, res) => {
 /* 수정하기 POST */
 router.post('/emend/:id', isLogin.isLogin, async (req, res) => {
     if (req.body.title && req.body.content) {
+        req.params.id = parseInt(req.params.id);
         const client = await mongoClient.connect();
         const cursor = client.db('Shop').collection('board');
         await cursor.updateOne(
@@ -137,6 +142,7 @@ router.post('/emend/:id', isLogin.isLogin, async (req, res) => {
 
 /* 삭제하기 DELETE */
 router.delete('/delete/:id', isLogin.isLogin, async (req, res) => {
+    req.params.id = parseInt(req.params.id);
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('board');
     // 예외처리

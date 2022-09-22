@@ -1,4 +1,5 @@
 const express = require('express');
+const { session } = require('passport');
 
 const router = express.Router();
 
@@ -16,8 +17,8 @@ const isLogin = (req, res, next) => {
 }
 
 /* 로그인 GET */
-router.get('/', (req, res) => {
-  res.render('login')
+router.get('/', async (req, res) => {
+    res.render('login')
 });
 
 /* 로그인 POST */
@@ -33,7 +34,6 @@ router.post('/', async (req, res) => {
         req.session.userId = req.body.id;
         res.status(200);
         res.redirect('/')
-        console.log(req.session.userName)
     } else {
         res.status(404);
     }

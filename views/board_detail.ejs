@@ -18,8 +18,6 @@
     <!-- main js -->
 
     <!-- css -->
-    <link rel="stylesheet" href="../css/style.css">
-
     <style>
         #detail {
             position: relative;
@@ -28,62 +26,119 @@
         }
         .container {
             max-width: 800px;
-            height: 100%;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
         }
 
-
-        #content {
-            height: 300px;
-        }
-
         .btn {
             float: right;
+        }
+        
+        .dd {
+            border-bottom: 1px solid black;
         }
     </style>
 </head>
 <body id="detail">
     <div class="container bg-light"> 
-        <form action="/board/detail/<%= ARTICLE.id %>" method="POST">
-            <div class="card rounded-0 mt-5">
-                <div class="card-header bg-transparent" id="title">
-                    <h5>[제목] <%= ARTICLE.title %></h5>
+        <div class="card rounded-0 mt-5">
+            <div class="card-header bg-transparent" id="title">
+                <h5>[제목] <%= ARTICLE.title %></h5>
                     
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <span>작성자</span>
-                            <span>시간</span>
-                        </div>
-                        
-                        <div>
-                            <span>조회수</span>
-                            <span>추천</span>
-                            <span>댓글</span>
-                        </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <span>작성자</span>
                     </div>
+                        
+                    <div>
+                        <span><%= ARTICLE.dateFull %></span>
+                    </div>
+                </div>
                     
+                <div class="d-flex justify-content-end">
+                    <div>
+                        <span>조회수 : ??</span>
+                    </div>
                 </div>
-                
-                <div class="card-body">
-                  <p class="card-title" id="content"><%= ARTICLE.content %></p>
-                
-                </div>
-                <div class="card-footer bg-transparent" id="comment">댓글
                     
-                </div>
             </div>
-        </form>
-
+                
+            <div class="card-body">
+                <p class="card-title" id="content"><%= ARTICLE.content %></p>
+            </div>
+                    
+            <div class="card-footer bg-transparent">
+                <% if (ARTICLE.comment !== undefined) { %>
+                    <h6 class="mt-1">전체 댓글 <%= ARTICLE.comment.length %>개</h6>
+                    <% for(let i=0; i < ARTICLE.comment.length ; i++) { %>   
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td scope="col" class="col-3"><%= ARTICLE.comment[i].userId %>(시간)</td>
+                                    <td scope="col" class="col-9"><%= ARTICLE.comment[i].comment %></td>
+                                </tr>
+                            </thead>
+                        </table>
+                    <% } %>
+                <% } else {%>
+                <% } %>
+                <form action="/board/detail/<%= ARTICLE._id %>" method="post" name="commentForm">
+                    <textarea name="comment" id="comment" class="w-100 rounded-0" 
+                    placeholder="타인의 권리를 침해하거나 명예를 훼손하는 댓글은 운영원칙에 따라 제제를 받을 수 있습니다"></textarea>
+                    <button type="button" class="btn btn-primary rounded-0" onclick="commentSubmit('<%= ARTICLE._id %>')">등록</button>
+                </form>
+            </div>
+        </div>
         <% if (ARTICLE.id === userId) { %>
-            <a href="/board/delete"><button type="button" class="btn btn-danger rounded-0 mt-3">삭제</button></a>
-            <a href="/board/emend/<%= ARTICLE._id %>"><button type="button" class="btn btn-success mt-3 me-3 rounded-0">수정</button></a>
+            <button type="button" class="btn btn-danger rounded-0 mt-3 mb-4 delete" data-id="<%= ARTICLE._id %>">삭제</button>
+            <a href="/board/emend/<%= ARTICLE._id %>"><button type="button" class="btn btn-success mt-3 me-3 mb-4 rounded-0">수정</button></a>
         <% } else { %>
-            <a href="/board/delete"><button type="button" class="btn btn-danger rounded-0 mt-3" disabled>삭제</button></a>
-            <a href="/board/emend/<%= ARTICLE.id %>"><button type="button" class="btn btn-success mt-3 me-3 rounded-0" disabled>수정</button></a>
+            <button type="button" class="btn btn-danger rounded-0 mt-3 mb-3" disabled>삭제</button>
+            <button type="button" class="btn btn-success mt-3 me-3 mb-3 rounded-0" disabled>수정</button>
         <% } %>
     </div>
 </body>
+<script>
+    $('.delete').click(function (e) {
+        const clickDelete = e.target.dataset.id;
+
+        $.ajax({
+            method: 'DELETE',
+            url: `/board/delete/${clickDelete}`,
+            data: { _id: clickDelete },
+        }).done(function (결과) {
+            alert('해당 글이 삭제되었습니다');
+            location.href = '/board';
+        }).fail(function (xhr, textStatus, errorThrown) {
+            alert('본인이 작성한 글이 아닙니다');
+            console.log(xhr, textStatus, errorThrown);
+        });
+    });
+
+    function commentSubmit() {
+        const commentForm = document.commentForm;
+        const comment = $('#comment').val();
+
+        if (comment === '') {
+            alert('댓글을 입력 해주세요');
+            return false;
+        } else {
+            alert('등록 되었습니다');
+            commentForm.submit();
+        };
+    };
+
+//     function commentSubmit(_id) {
+//     fetch(`board/detail/${_id}`, {
+//       method: 'post',
+//       headers: {
+//         'Content-type': 'application/json'
+//       },
+//     }).then((res) => {
+//       location.reload()
+//     })
+//   }
+</script>
 </html>
