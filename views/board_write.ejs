@@ -47,13 +47,15 @@
 </head>
 <body id="write">
     <div class="container bg-light">
-        <form action="/board/write" method="POST" name="write" id="write_form">
+        <form action="/board/write" method="POST" name="write" id="write_form" enctype="multipart/form-data">
             <h1 class="p-4 text-center">글 작성</h1>
             <input type="text" name="title" class="form-control rounded-0 mb-5" placeholder="제목을 입력해 주세요" id="title"/>
 
             <textarea class="form-control rounded-0" rows="10" id="content" name="content" placeholder="내용"></textarea>
+
+            <input class="mt-3" type="file" name="img"/>
     
-            <button type="button" class="btn btn-primary rounded-0 mt-4 mb-4" onclick="subPost()">등록</button>
+            <button type="button" class="btn btn-primary rounded-0 mt-5 mb-4" onclick="subPost()">등록</button>
         </form>
     </div>
 </body>

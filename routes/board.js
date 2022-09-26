@@ -6,6 +6,27 @@ const mongoClient = require('./mongo');
 
 const isLogin = require('./login');
 
+const multer = require('multer');
+
+const fs = require('fs');
+
+const dir = './uploads';
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '_' + Date.now());
+    },
+});
+
+const limits = {
+    fileSize: 1024 * 1028 * 2,
+};
+
+const upload = multer({ storage, limits });
+
 /* 게시판 GET */
 router.get('/', async (req, res) => {
     const client = await mongoClient.connect();
@@ -40,7 +61,9 @@ router.get('/write', isLogin.isLogin, (req, res) => {
 // });
 
 /* 글작성 POST */
-router.post('/write', isLogin.isLogin, async (req, res) => {
+router.post('/write', isLogin.isLogin, upload.single('img'), async (req, res) => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    console.log(req.file);
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('counter');
     await cursor.findOne({name: 'listTotal'}, function(err, result){
@@ -56,13 +79,16 @@ router.post('/write', isLogin.isLogin, async (req, res) => {
         const dateFull = year + '.' + month + '.' + day + ' ' + hours + ':' + minutes;
 
         const savePost = {
-            _id: allPost + 1,
+            num: allPost + 1,
             id: req.session.userId,
             name: req.session.userName,
             title: req.body.title,
             content: req.body.content,
             time,
             dateFull,
+            view: 0,
+            star: 0,
+            img: req.file ? req.file.filename : null,
         }
 
         const cursor1 = client.db('Shop').collection('board');
@@ -83,40 +109,87 @@ router.get('/detail/:id', async (req, res) => {
     req.params.id = parseInt(req.params.id);
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('board');
-    const ARTICLE = await cursor.findOne({ _id : req.params.id });
-
+    const ARTICLE = await cursor.findOne({ num : req.params.id});
+    
+    await cursor.updateOne(
+        { num : req.params.id },
+        {
+            $inc: { view : 1 },
+        }
+    );
     res.render('board_detail', { 
         ARTICLE,
         userId: req.session.userId,
     });
 }); 
 
+router.post("/detail/star", async (req, res) => {
+    req.body.articleNum = parseInt(req.body.articleNum);
+    const client = await mongoClient.connect();
+    const cursor = client.db("Shop").collection("board");
+    
+    await cursor.updateOne(
+        { num: req.body.articleNum },
+        {
+            $inc: { star : 1 },
+        }
+    );
+    res.status(200).send("삭제 성공");
+});
+
 /* 자세히보기 -> 댓글 POST */
 router.post('/detail/:id', async (req, res) => {
     req.params.id = parseInt(req.params.id);
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('board');
+    const today = new Date();
+    const hours = ('0' + today.getHours()).slice(-2);
+    const minutes = ('0' + today.getMinutes()).slice(-2);
+    var seconds = ('0' + today.getSeconds()).slice(-2); 
+    const timeHM = hours + ':' + minutes;
+    const timeHMS = hours + ':' + minutes + ':' + seconds;
+
     await cursor.updateOne(
-        { _id: req.params.id },
+        { num : req.params.id },
         {
             $push: {
                 comment: {
                     comment: req.body.comment,
                     userId: req.session.userId,
+                    timeHM,
+                    timeHMS,
                 }
             },
         }
     );
-    res.redirect('/detail/40')
+    res.redirect('/board')
 });
 
+/* 댓글 삭제하기 DELETE */
+router.delete("/delete/comment", async (req, res) => {
+    req.body.articleNum = parseInt(req.body.articleNum);
+    const client = await mongoClient.connect();
+    const cursor = client.db("Shop").collection("board");
+    
+    await cursor.updateOne(
+        { num: req.body.articleNum },
+        {
+            $pull: {
+                comment: {
+                    timeHMS: req.body.commentTime,
+                },
+            },
+        }
+    );
+    res.status(200).send("삭제 성공");
+});
 
 /* 수정하기 GET */
 router.get('/emend/:id', isLogin.isLogin, async (req, res) => {
     req.params.id = parseInt(req.params.id);
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('board');
-    const selectedArticle = await cursor.findOne({ _id : req.params.id });
+    const selectedArticle = await cursor.findOne({ num : req.params.id });
     
     res.render('board_emend', { selectedArticle });
 });
@@ -128,7 +201,7 @@ router.post('/emend/:id', isLogin.isLogin, async (req, res) => {
         const client = await mongoClient.connect();
         const cursor = client.db('Shop').collection('board');
         await cursor.updateOne(
-            { _id : req.params.id },
+            { num : req.params.id },
             {
                 $set: {
                     title: req.body.title,
@@ -146,7 +219,7 @@ router.delete('/delete/:id', isLogin.isLogin, async (req, res) => {
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('board');
     // 예외처리
-    const result = await cursor.deleteOne({ _id: req.params.id });
+    const result = await cursor.deleteOne({ num : req.params.id });
     if (result.acknowledged) {
       res.send('삭제완료');
     } else {
@@ -155,5 +228,34 @@ router.delete('/delete/:id', isLogin.isLogin, async (req, res) => {
       throw err;
     }
 });
+
+/* 검색기능 */
+router.get('/search', async (req, res) => {
+    const search = [
+        {
+            $search: {
+                index: 'titleSearch',
+                text: {
+                    query: req.query.value,
+                    path: 'title'
+                }
+            }
+        },
+        { $sort : { 
+                _id : -1 
+            }
+        },
+    ]
+    const client = await mongoClient.connect();
+    const cursor = client.db('Shop').collection('board');
+    const ARTICLE = await cursor.aggregate(search).toArray();
+    const articleLen = ARTICLE.length;
+
+    res.render('board_search', {
+        ARTICLE,
+        articleCounts: articleLen,
+        userId: req.session.userId,
+    })
+})
     
 module.exports = router;

@@ -22,23 +22,26 @@
         #detail {
             position: relative;
             width: 100%;
-            height: 100vh;
         }
         .container {
             max-width: 800px;
             position: absolute;
-            top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
         }
 
         .btn {
             float: right;
         }
-        
-        .dd {
-            border-bottom: 1px solid black;
+
+        .time {
+            font-size: 12px;
         }
+        .badge {
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+
     </style>
 </head>
 <body id="detail">
@@ -49,7 +52,7 @@
                     
                 <div class="d-flex justify-content-between">
                     <div>
-                        <span>작성자</span>
+                        <span>작성자 : <%= ARTICLE.id %></span>
                     </div>
                         
                     <div>
@@ -59,14 +62,21 @@
                     
                 <div class="d-flex justify-content-end">
                     <div>
-                        <span>조회수 : ??</span>
+                        <span>조회수 : <%= ARTICLE.view %></span>
                     </div>
                 </div>
-                    
             </div>
                 
             <div class="card-body">
-                <p class="card-title" id="content"><%= ARTICLE.content %></p>
+                <% if (ARTICLE.img !=null) { %>
+                    <img src="/uploads/<%= ARTICLE.img %>" max-width="500">
+                <% } %>
+
+                <p class="card-title" id="content"><%= ARTICLE.content %></p>                    
+                
+                <h4>
+                    <span class="badge text-bg-warning" style="cursor: pointer;" onclick="starClick('<%= ARTICLE.num %>')">★ <%= ARTICLE.star %></span>
+                </h4>
             </div>
                     
             <div class="card-footer bg-transparent">
@@ -74,26 +84,45 @@
                     <h6 class="mt-1">전체 댓글 <%= ARTICLE.comment.length %>개</h6>
                     <% for(let i=0; i < ARTICLE.comment.length ; i++) { %>   
                         <table class="table">
-                            <thead>
+                            <tbody>
                                 <tr>
-                                    <td scope="col" class="col-3"><%= ARTICLE.comment[i].userId %>(시간)</td>
-                                    <td scope="col" class="col-9"><%= ARTICLE.comment[i].comment %></td>
+                                    <td scope="row" class="col-2 user"><%= ARTICLE.comment[i].userId %> <br><span class="time"><p class="text-secondary">(<%= ARTICLE.comment[i].timeHMS %>)</p></td>
+                                    <td style="word-break:break-all" class="col-9 pb-4"><%= ARTICLE.comment[i].comment %></td>
+                                    <% if (ARTICLE.id === userId) { %>
+                                        <td class="col-1">
+                                            <button class="btn rounded-0 comDelete" style="--bs-btn-padding-y: .10rem; --bs-btn-padding-x: .4rem; --bs-btn-font-size: .6rem;" 
+                                                onclick="deleteComment('<%= ARTICLE.num %>', '<%= ARTICLE.comment[i].timeHMS %>');">x
+                                            </button>
+                                        </td>
+                                    <% } else if(ARTICLE.comment[i].userId === userId){ %>
+                                        <td class="col-1">
+                                            <button class="btn rounded-0 comDelete" style="--bs-btn-padding-y: .10rem; --bs-btn-padding-x: .4rem; --bs-btn-font-size: .6rem;" 
+                                                onclick="deleteComment('<%= ARTICLE.num %>', '<%= ARTICLE.comment[i].timeHMS %>');">x
+                                            </button>
+                                        </td>
+                                    <% } else { %>
+                                        <td class="col-1"></td>
+                                    <% } %>
                                 </tr>
-                            </thead>
+                            </tbody>
                         </table>
                     <% } %>
                 <% } else {%>
+                    <h6 class="mt-1">전체 댓글 0개</h6>
                 <% } %>
+
+                <% if (userId !== undefined) { %>
                 <form action="/board/detail/<%= ARTICLE._id %>" method="post" name="commentForm">
                     <textarea name="comment" id="comment" class="w-100 rounded-0" 
                     placeholder="타인의 권리를 침해하거나 명예를 훼손하는 댓글은 운영원칙에 따라 제제를 받을 수 있습니다"></textarea>
-                    <button type="button" class="btn btn-primary rounded-0" onclick="commentSubmit('<%= ARTICLE._id %>')">등록</button>
+                    <button type="button" class="btn btn-primary rounded-0" id="commentBtn" data-comment="<%= ARTICLE.num %>">등록</button>
                 </form>
+                <% } %>
             </div>
         </div>
         <% if (ARTICLE.id === userId) { %>
-            <button type="button" class="btn btn-danger rounded-0 mt-3 mb-4 delete" data-id="<%= ARTICLE._id %>">삭제</button>
-            <a href="/board/emend/<%= ARTICLE._id %>"><button type="button" class="btn btn-success mt-3 me-3 mb-4 rounded-0">수정</button></a>
+            <button type="button" class="btn btn-danger rounded-0 mt-3 mb-4 delete" data-delete="<%= ARTICLE.num %>">삭제</button>
+            <a href="/board/emend/<%= ARTICLE.num %>"><button type="button" class="btn btn-success mt-3 me-3 mb-4 rounded-0">수정</button></a>
         <% } else { %>
             <button type="button" class="btn btn-danger rounded-0 mt-3 mb-3" disabled>삭제</button>
             <button type="button" class="btn btn-success mt-3 me-3 mb-3 rounded-0" disabled>수정</button>
@@ -101,8 +130,9 @@
     </div>
 </body>
 <script>
+    /* 게시글 삭제 기능 */
     $('.delete').click(function (e) {
-        const clickDelete = e.target.dataset.id;
+        const clickDelete = e.target.dataset.delete;
 
         $.ajax({
             method: 'DELETE',
@@ -117,28 +147,69 @@
         });
     });
 
-    function commentSubmit() {
-        const commentForm = document.commentForm;
+    /* 댓글 추가 */
+    $('#commentBtn').click(function (e) {
+        const clickComment = e.target.dataset.comment;
         const comment = $('#comment').val();
 
         if (comment === '') {
             alert('댓글을 입력 해주세요');
             return false;
-        } else {
-            alert('등록 되었습니다');
-            commentForm.submit();
-        };
-    };
+        }
 
-//     function commentSubmit(_id) {
-//     fetch(`board/detail/${_id}`, {
-//       method: 'post',
-//       headers: {
-//         'Content-type': 'application/json'
-//       },
-//     }).then((res) => {
-//       location.reload()
-//     })
-//   }
+        $.ajax({
+            method: 'POST',
+            url: `/board/detail/${clickComment}`,
+            data: { 
+                _id: clickComment,
+                comment: comment,
+            },
+        }).done(function (결과) {
+            alert('해당 댓글이 등록 되었습니다');
+            location.reload();
+        }).fail(function (xhr, textStatus, errorThrown) {
+            alert('해당 댓글이 등록 되지 않았습니다');
+            console.log(xhr, textStatus, errorThrown);
+        });
+    });
+
+    /* 댓글 삭제 기능 */
+    function deleteComment(articleNum, commentTime) {
+        fetch('/board/delete/comment', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                articleNum,
+                commentTime,
+            })
+        }).then((res) => {
+            alert('해당 댓글이 삭제 되었습니다!');
+            location.reload();
+        }).catch((err) => {
+            alert('문제가 발생했습니다.');
+            location.reload();
+        })
+    }
+
+    /* 게시글 추천 기능 */
+    function starClick(articleNum) {
+        fetch('/board/detail/star', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                articleNum,
+            })
+        }).then((res) => {
+            alert('해당 게시글이 추천 되었습니다!');
+            location.reload();
+        }).catch((err) => {
+            alert('문제가 발생했습니다.');
+            location.reload();
+        })
+    }
 </script>
 </html>

@@ -49,9 +49,9 @@
     <% } else { %>
         <%- include('nav_signup.html') %>
     <% } %>  
-        <h1 class="pt-2 text-center">전체글</h1>
+        <h1 class="pt-2 text-center">검색한 글</h1>
         
-        <form class="d-flex sh" role="search" method="get">
+        <form class="d-flex sh" role="search">
           <input class="form-control me-2 w-75 rounded-0" type="search" aria-label="Search" id="search_input">
           <button class="btn btn-outline-success rounded-0" type="button" onclick="search();">검색</button>
         </form>
@@ -88,7 +88,7 @@
                 <% } %>
               <% } else { %>
                 <tr>
-                  <td colspan="5" scope="row" class="text-center">게시글이 없습니다</td>
+                  <td colspan="5" scope="row" class="text-center">검색 된 글이 없습니다</td>
                 </tr>
               <% } %>
             </tbody>
