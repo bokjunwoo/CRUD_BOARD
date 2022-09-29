@@ -31,14 +31,34 @@ const upload = multer({ storage, limits });
 router.get('/', async (req, res) => {
     const client = await mongoClient.connect();
     const cursor = client.db('Shop').collection('board');
-    const ARTICLE = await cursor.find().sort({'_id':-1}).toArray();
+    const total = await client.db('Shop').collection('board').count();
+
+    const viewPage = 1;
+    const pages = Math.ceil(total / viewPage);
+    const pageNumber = (req.query.page === null) ? 1 : req.query.page;
+    const skipPage = (pageNumber - 1) * viewPage;
+
+    const ARTICLE = await cursor.find({}).sort({ "_id" : -1 }).skip(skipPage).limit(viewPage).toArray();
     const articleLen = ARTICLE.length;
+
     res.render('board', {
+        pages,
         ARTICLE,
         articleCounts: articleLen,
         userId: req.session.userId,
-    });
+    });  
 });
+// router.get('/', async (req, res) => {
+//     const client = await mongoClient.connect();
+//     const cursor = client.db('Shop').collection('board');
+//     const ARTICLE = await cursor.find().sort({'_id':-1}).toArray();
+//     c
+//     res.render('board', {
+//         ARTICLE,
+//         articleCounts: articleLen,
+//         userId: req.session.userId,
+//     });
+// });
 
 /* 글작성 GET */
 router.get('/write', isLogin.isLogin, (req, res) => {

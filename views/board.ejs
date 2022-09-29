@@ -43,57 +43,67 @@
     </style>
 </head>
 <body id="board">
-    <div class="container bg-light">
-      <% if (userId !== undefined) { %>
-        <%- include('nav_login.html') %>
+  <div class="container bg-light">
+    <% if (userId !== undefined) { %>
+      <%- include('nav_login.html') %>
     <% } else { %>
-        <%- include('nav_signup.html') %>
+      <%- include('nav_signup.html') %>
     <% } %>  
-        <h1 class="pt-2 text-center">전체글</h1>
+      <h1 class="pt-2 text-center">전체글</h1>
         
-        <form class="d-flex sh" role="search" method="get">
-          <input class="form-control me-2 w-75 rounded-0" type="search" aria-label="Search" id="search_input">
-          <button class="btn btn-outline-success rounded-0" type="button" onclick="search();">검색</button>
-        </form>
+    <form class="d-flex sh" role="search" method="get">
+      <input class="form-control me-2 w-75 rounded-0" type="search" aria-label="Search" id="search_input">
+      <button class="btn btn-outline-success rounded-0" type="button" onclick="search();">검색</button>
+    </form>
         
-        <% if (userId !== undefined) { %>
-          <a href="/board/write"><button type="button" class="btn btn-secondary mb-3 rounded-0">글쓰기</button></a>
-        <% } else { %>
-          <a href="/board/write"><button type="button" class="btn btn-secondary mb-3 rounded-0" disabled>글쓰기</button></a>
-        <% } %>
-        <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th scope="col" class="col-1 text-center">번호</th>
-                <th scope="col" class="col-7 text-center">제목</th>
-                <th scope="col" class="col-2 text-center">글쓴이</th>
-                <th scope="col" class="col-1 text-center">조회</th>
-                <th scope="col" class="col-1 text-center">추천</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (articleCounts > 0) { %>
-                <% for(let i=0; i < articleCounts; i++) { %>
-              <tr>
-                <th scope="row" class="text-center"><%= ARTICLE[i].num %></th>
+    <% if (userId !== undefined) { %>
+      <a href="/board/write"><button type="button" class="btn btn-secondary mb-3 rounded-0">글쓰기</button></a>
+    <% } else { %>
+      <a href="/board/write"><button type="button" class="btn btn-secondary mb-3 rounded-0" disabled>글쓰기</button></a>
+    <% } %>
+      
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th scope="col" class="col-1 text-center">번호</th>
+          <th scope="col" class="col-7 text-center">제목</th>
+          <th scope="col" class="col-2 text-center">글쓴이</th>
+          <th scope="col" class="col-1 text-center">조회</th>
+          <th scope="col" class="col-1 text-center">추천</th>
+        </tr>      
+      </thead>
+      
+      <tbody>
+        <% if (articleCounts > 0) { %>
+          <% for(let i=0; i < articleCounts; i++) { %>
+            <tr>
+              <th scope="row" class="text-center"><%= ARTICLE[i].num %></th>
                 <% if (ARTICLE[i].comment !== undefined) { %>
                   <td onclick="location.href='/board/detail/<%= ARTICLE[i].num %>'" style="cursor:pointer"><%= ARTICLE[i].title %> <span class="text-secondary">[<%= ARTICLE[i].comment.length %>]</span></td>
                 <% } else { %>
                   <td onclick="location.href='/board/detail/<%= ARTICLE[i].num %>'" style="cursor:pointer"><%= ARTICLE[i].title %> <span class="text-secondary">[0]</span></td>
                 <% } %>    
-                <td><%= ARTICLE[i].id %></td>
-                <td class="text-center"><%= ARTICLE[i].view %></td>
-                <td class="text-center"><%= ARTICLE[i].star %></td>
-              </tr>
-                <% } %>
-              <% } else { %>
-                <tr>
-                  <td colspan="5" scope="row" class="text-center">게시글이 없습니다</td>
-                </tr>
-              <% } %>
-            </tbody>
-          </table>
-    </div>
+              <td><%= ARTICLE[i].id %></td>
+              <td class="text-center"><%= ARTICLE[i].view %></td>
+              <td class="text-center"><%= ARTICLE[i].star %></td>
+            </tr>
+          <% } %>
+        <% } else { %>
+          <tr>
+            <td colspan="5" scope="row" class="text-center">게시글이 없습니다</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+    
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <% for (var i = 1; i <= pages; i++) { %>
+          <li class="page-item"><a class="page-link rounded-0" href="?page=<%= i; %>"><%= i; %></a></li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
 </body>
 <script>
   function search () {
