@@ -37,9 +37,7 @@
 
       .sh {
         position: absolute;
-
       }
-
     </style>
 </head>
 <body id="board">
@@ -49,17 +47,17 @@
     <% } else { %>
       <%- include('nav_signup.html') %>
     <% } %>  
-      <h1 class="pt-2 text-center">전체글</h1>
+      <h1 class="pt-4 text-center">전체글</h1>
         
     <form class="d-flex sh" role="search" method="get">
       <input class="form-control me-2 w-75 rounded-0" type="search" aria-label="Search" id="search_input">
-      <button class="btn btn-outline-success rounded-0" type="button" onclick="search();">검색</button>
+      <button class="btn btn-outline-primary rounded-0" type="button" onclick="search();">검색</button>
     </form>
         
     <% if (userId !== undefined) { %>
       <a href="/board/write"><button type="button" class="btn btn-secondary mb-3 rounded-0">글쓰기</button></a>
     <% } else { %>
-      <a href="/board/write"><button type="button" class="btn btn-secondary mb-3 rounded-0" disabled>글쓰기</button></a>
+      <button type="button" class="btn btn-secondary mb-3 rounded-0" onclick="writeBtn()">글쓰기</button>
     <% } %>
       
     <table class="table table-bordered">
@@ -81,7 +79,7 @@
                 <% if (ARTICLE[i].comment !== undefined) { %>
                   <td onclick="location.href='/board/detail/<%= ARTICLE[i].num %>'" style="cursor:pointer"><%= ARTICLE[i].title %> <span class="text-secondary">[<%= ARTICLE[i].comment.length %>]</span></td>
                 <% } else { %>
-                  <td onclick="location.href='/board/detail/<%= ARTICLE[i].num %>'" style="cursor:pointer"><%= ARTICLE[i].title %> <span class="text-secondary">[0]</span></td>
+                  <td onclick="location.href='/board/detail/<%= ARTICLE[i].num %>'" style="cursor:pointer"><%= ARTICLE[i].title %> <span class="text-secondary"></span></td>
                 <% } %>    
               <td><%= ARTICLE[i].id %></td>
               <td class="text-center"><%= ARTICLE[i].view %></td>
@@ -98,18 +96,37 @@
     
     <nav aria-label="Page navigation example">
       <ul class="pagination justify-content-center">
-        <% for (var i = 1; i <= pages; i++) { %>
+        <!-- 처음 페이지의 경우는 〈 비활성화 2번째 페이지 경우는 1페이지로 이동 로직 -->
+        <% if (startPage > viewPage) { %>
+          <li class="page-item"><a class="page-link" href='?page=<%= `${startPage - 1}` %>'>〈</a></li>
+        <% } else { %>
+          <li class="page-item"><a class="page-link" href='?page=<%= startPage %>'>〈</a></li>  
+        <% } %> 
+  
+        <!-- startPage부터 endPage까지 반복하며 페이지 버튼을 출력 -->
+        <% for (let i = startPage; i <= endPage ; i++) { %>
           <li class="page-item"><a class="page-link rounded-0" href="?page=<%= i; %>"><%= i; %></a></li>
+        <% } %>
+  
+        <!-- 마지막 페이지의 경우는 〉 비활성화 1번째 페이지 경우는 2페이지로 이동 로직 -->
+        <% if (endPage < totalPage) { %>
+          <li class="page-item"><a class="page-link" href="?page=<%= `${endPage + 1}` %>">〉</a></li>
+        <% } else { %>
+          <li class="page-item"><a class="page-link" href="?page=<%= endPage %>">〉</a></li>
         <% } %>
       </ul>
     </nav>
   </div>
 </body>
 <script>
-  function search () {
+  function search() {
     const search_input = document.querySelector('#search_input').value;
     console.log(search_input)
     window.location.replace(`/board/search?value=${search_input}`)
+  }
+
+  function writeBtn() {
+    alert('로그인이 필요한 기능입니다.')
   }
 </script>
 </html>

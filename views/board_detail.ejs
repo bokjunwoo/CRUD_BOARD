@@ -41,12 +41,19 @@
             margin-left: 50%;
             transform: translateX(-50%);
         }
-
+        img {
+            width: 300px;
+        }
     </style>
 </head>
 <body id="detail">
-    <div class="container bg-light"> 
-        <div class="card rounded-0 mt-5">
+    <div class="container bg-light">
+        <% if (userId !== undefined) { %>
+            <%- include('nav_login.html') %>
+          <% } else { %>
+            <%- include('nav_signup.html') %>
+          <% } %>  
+        <div class="card rounded-0 mt-5 mb-5">
             <div class="card-header bg-transparent" id="title">
                 <h5>[제목] <%= ARTICLE.title %></h5>
                     
@@ -69,7 +76,7 @@
                 
             <div class="card-body">
                 <% if (ARTICLE.img !=null) { %>
-                    <img src="/uploads/<%= ARTICLE.img %>" max-width="500">
+                    <img src="/uploads/<%= ARTICLE.img %>">
                 <% } %>
 
                 <p class="card-title" id="content"><%= ARTICLE.content %></p>                    
@@ -117,15 +124,17 @@
                     placeholder="타인의 권리를 침해하거나 명예를 훼손하는 댓글은 운영원칙에 따라 제제를 받을 수 있습니다"></textarea>
                     <button type="button" class="btn btn-primary rounded-0" id="commentBtn" data-comment="<%= ARTICLE.num %>">등록</button>
                 </form>
+                <% } else { %>
+                    <textarea name="comment" id="comment" class="w-100 rounded-0" placeholder="댓글을 작성하려면 로그인 해주세요" onclick="commentBtn()"></textarea>
                 <% } %>
             </div>
         </div>
         <% if (ARTICLE.id === userId) { %>
-            <button type="button" class="btn btn-danger rounded-0 mt-3 mb-4 delete" data-delete="<%= ARTICLE.num %>">삭제</button>
-            <a href="/board/emend/<%= ARTICLE.num %>"><button type="button" class="btn btn-success mt-3 me-3 mb-4 rounded-0">수정</button></a>
+            <button type="button" class="btn btn-danger rounded-0 mb-4 delete" data-delete="<%= ARTICLE.num %>">삭제</button>
+            <a href="/board/emend/<%= ARTICLE.num %>"><button type="button" class="btn btn-success me-3 mb-4 rounded-0">수정</button></a>
         <% } else { %>
-            <button type="button" class="btn btn-danger rounded-0 mt-3 mb-3" disabled>삭제</button>
-            <button type="button" class="btn btn-success mt-3 me-3 mb-3 rounded-0" disabled>수정</button>
+            <!-- <button type="button" class="btn btn-danger rounded-0 mt-3 mb-3" disabled>삭제</button>
+            <button type="button" class="btn btn-success mt-3 me-3 mb-3 rounded-0" disabled>수정</button> -->
         <% } %>
     </div>
 </body>
@@ -140,7 +149,7 @@
             data: { _id: clickDelete },
         }).done(function (결과) {
             alert('해당 글이 삭제되었습니다');
-            location.href = '/board';
+            location.href = '/board?page=${}';
         }).fail(function (xhr, textStatus, errorThrown) {
             alert('본인이 작성한 글이 아닙니다');
             console.log(xhr, textStatus, errorThrown);
@@ -210,6 +219,10 @@
             alert('문제가 발생했습니다.');
             location.reload();
         })
+    }
+
+    function commentBtn() {
+        alert('로그인이 필요한 기능입니다.')
     }
 </script>
 </html>

@@ -33,16 +33,38 @@ router.get('/', async (req, res) => {
     const cursor = client.db('Shop').collection('board');
     const total = await client.db('Shop').collection('board').count();
 
-    const viewPage = 1;
-    const pages = Math.ceil(total / viewPage);
+    // 페이지에 보여줄 게시글의 수
+    const viewPage = 10;
+    // 페이지에 표시할 페이지의 수
+    const maxPage = 5;
+    // 전체 페이지의 수
+    const totalPage = Math.ceil(total / viewPage);
+    // 현재 페이지수 가져오기 없으면 1
     const pageNumber = (req.query.page === null) ? 1 : req.query.page;
+    // URL로 페이지 수보다 높은 값을 입력할 때 마지막페이지를 보여준다
+    if (pageNumber > totalPage) {
+        pageNumber = totalPage;
+    }
+    // 스킵할 페이지
     const skipPage = (pageNumber - 1) * viewPage;
+    // 페이지에 표시할 시작번호
+    const startPage = Math.floor(((pageNumber - 1) / maxPage)) * maxPage + 1;
+    // 페이지에 표시할 마지막번호
+    let endPage = startPage + maxPage - 1;
+    // 마지막 페이지가 전체페이지보다 클 때 전체값으로 출력
+    if (endPage > totalPage) { 
+        endPage = totalPage;
+    }
 
     const ARTICLE = await cursor.find({}).sort({ "_id" : -1 }).skip(skipPage).limit(viewPage).toArray();
     const articleLen = ARTICLE.length;
 
     res.render('board', {
-        pages,
+        viewPage,
+        totalPage,
+        maxPage,
+        startPage,
+        endPage,
         ARTICLE,
         articleCounts: articleLen,
         userId: req.session.userId,
