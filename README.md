@@ -1,4 +1,8 @@
 ## CRUD 연습
+![ezgif com-gif-maker (6) (1)](https://user-images.githubusercontent.com/106523012/196913443-2be2b300-7003-4aa8-b923-1959c70d11cd.gif)
+![ezgif com-gif-maker (10) (1)](https://user-images.githubusercontent.com/106523012/196913461-5c845ed8-b7cc-4743-b67e-a2f6395c9bbc.gif)
+![ezgif com-gif-maker (11) (1)](https://user-images.githubusercontent.com/106523012/196913478-c5142bfc-dcaa-4abd-9fa1-ee80d36c2285.gif)
+![ezgif com-gif-maker (16) (1)](https://user-images.githubusercontent.com/106523012/196913486-87a9b1ff-b50d-41af-9c89-1ee669a85d9c.gif)
 
 # app
 9월22일
