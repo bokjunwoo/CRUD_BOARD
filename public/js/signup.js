@@ -81,8 +81,13 @@ let rpwCh = 0;
 $('#rpw').focusout(function(){
     const userPw = $('#pw').val();
     const userRPw = $('#rpw').val();
-    
-    if(userPw !== userRPw) {
+
+    if(userRPw === '') {
+        $('.text_rpw').text('필수 정보 입니다'); 
+        $('.text_rpw').css('color', 'red');
+        rpwCh = 0; 
+        return false;
+    } else if(userPw !== userRPw) {
         $('.text_rpw').text('설정하려는 비밀번호가 맞는지 확인하기 위해 다시 입력 해주세요.'); 
         $('.text_rpw').css('color', 'red');
         rpwCh = 0; 
@@ -122,7 +127,7 @@ $('#name').focusout(function(){
             nameCh = 0;
         } else {
             $('.text_name').css('color', 'green');
-            $('.text_name').text('가능');
+            $('.text_name').text('사용 가능한 닉네임 입니다.');
             nameCh = 1;
         };
     });

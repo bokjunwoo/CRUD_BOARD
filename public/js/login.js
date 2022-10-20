@@ -16,9 +16,14 @@ function loginClick() {
             pw: userPw,
         },
     }).done(function(result){ 
-        if(result === '오류') {
+        if (result === '비밀번호가 다릅니다.') {
             $('#err').css('color', 'gray');
             $('#err').css('display', 'block');
+            return false;
+        } else if (result === '해당 id 가 없습니다.') {
+            $('#err').css('color', 'gray');
+            $('#err').css('display', 'block');
+            return false;
         } else {
             loginForm.submit();
         };

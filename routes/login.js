@@ -22,20 +22,28 @@ router.get('/', async (req, res) => {
 });
 
 /* 로그인 POST */
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, cb) => {
     const client = await mongoClient.connect();
     const userCursor = client.db('Shop').collection('users');
-    const idResult = await userCursor.findOne({
-        id: req.body.id,
-        pw: req.body.pw,
-    });
+    const idResult = await userCursor.findOne({id: req.body.id,});
     if (idResult !== null) {
-        req.session.login = true;
-        req.session.userId = req.body.id;
-        res.status(200);
-        res.redirect('/')
+        const result = await userCursor.findOne({
+            id: req.body.id,
+            pw: req.body.pw,
+        });
+        if (result !== null) {
+            cb(null, result);
+            req.session.login = true;
+            req.session.userId = req.body.id;
+            res.status(200);
+            res.redirect('/board?page=1')
+        } else {
+            cb(null, false, { message: '비밀번호가 다릅니다.' });
+            res.send('비밀번호가 다릅니다.')
+        }
     } else {
-        res.status(404);
+        cb(null, false, { message: '해당 id 가 없습니다.' });
+        res.send('해당 id 가 없습니다.')
     }
 });
 

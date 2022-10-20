@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 });
 
 const limits = {
-    fileSize: 1024 * 1028 * 2,
+    fileSize: 1024 * 1024 * 2,
 };
 
 const upload = multer({ storage, limits });
@@ -143,7 +143,7 @@ router.post('/write', isLogin.isLogin, upload.single('img'), async (req, res) =>
             })
         })
     });
-    res.redirect('/board');
+    res.redirect('/board?page=1');
 });
 
 /* 자세히보기 GET */
